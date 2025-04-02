@@ -44,7 +44,7 @@ LABELS_KOR = [
 MODEL_PATH = "yolo/best.pt" # Path에 맞게 설정
 model = YOLO(MODEL_PATH)  # Load Model
 
-def run_detection(img_path, save_path=None, conf_thres=0.5): # Save bounding boxed image
+def run_detection(img_path, save_path=None, json_save_path=None, conf_thres=0.5): # Save bounding boxed image
     results = model(img_path, conf=conf_thres)[0]
     img = cv2.imread(img_path)
     detected = []
@@ -70,6 +70,13 @@ def run_detection(img_path, save_path=None, conf_thres=0.5): # Save bounding box
 
     if save_path:
         cv2.imwrite(save_path, img)
+        print(f"✅ 분석 이미지 저장됨: {save_path}")
+
+    if json_save_path:
+        with open(json_save_path, "w", encoding="utf-8") as f:
+            json.dump(detected, f, ensure_ascii=False, indent=2)
+        print(f"📄 JSON 저장 완료: {json_save_path}")
+
     return detected
 
 if __name__ == "__main__": # python detect.py --img test.png --save_path path/filename

@@ -1,0 +1,18 @@
+{
+  "message": "Complete",
+  "yolo_result": [
+    { "label_kor": "계란", "confidence": 0.96 },
+    { "label_kor": "브로콜리", "confidence": 0.89 }
+  ],
+  "s3": {
+    "result_image_url": "https://.../results/result_20240402_egg.jpg",
+    "result_json_url": "https://.../json_results/result_20240402_egg.json"
+  }
+}
+
+
+# 삭제
+{
+  "message": "관련 파일 삭제 완료",
+  "deleted": ["original", "result_image", "result_json"]
+}

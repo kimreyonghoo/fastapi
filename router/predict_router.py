@@ -27,5 +27,4 @@ async def predict(file: UploadFile = File(...)):
     return JSONResponse(content={
         "result": result,
         "saved_image": result_path
-        # "saved_image": result_image_url
     })
