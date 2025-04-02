@@ -12,7 +12,7 @@ from internal.database import get_dynamodb
 from internal.aws_config import aws_access
 from internal import database
 #from domain.domain import UserRepository
-from router.predict_router import router
+#from router.predict_router import router
 
 # FastAPI 애플리케이션 생성
 app = FastAPI()
