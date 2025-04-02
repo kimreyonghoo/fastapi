@@ -1,0 +1,17 @@
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+서버 재시작 (로컬에서)
+
+docker compose up
+기존 이미지/컨테이너 실행
+
+docker compose up --build
+무조건 다시 빌드 후 실행
+
+docker compose down
+모든 컨테이너 정지 + 네트워크 정리
+
+# 도커 이미지 백업 매뉴얼
+1. cd /home/ubuntu/docker_backup
+2. docker save fastapi_app-app | gzip > fastapi_app_backup_(오늘 날짜).tar.gz
+3. aws s3 cp fastapi_app_backup_(오늘 날짜).tar.gz s3://fastapi-app-koreatech-bucket/backups/
+4. s3 이미지 업로드 완료!

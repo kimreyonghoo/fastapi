@@ -1,0 +1,10 @@
+{
+  "menu": "비빔밥",
+  "nutrition": {
+    "calories": 550,
+    "protein": 22.3,
+    "carbs": 74.2,
+    "fat": 18.5
+  },
+  "status": "success"
+}

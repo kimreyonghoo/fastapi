@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+boto3
+python-dotenv
+python-multipart==0.0.20
+ultralytics==8.3.89
+opencv-python==4.11.0.86
+pillow==10.2.0
