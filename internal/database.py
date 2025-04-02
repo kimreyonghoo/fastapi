@@ -34,11 +34,10 @@ def get_table(table_name:str, access:dict):
 
 db=get_dynamodb(aws_access)
 
-def get_name(tablename,cat: str, name: str) -> dict:
+def get_name(tablename, name: str) -> dict:
         response = get_table(tablename,aws_access).get_item(
             Key={
-                'PK': f'{unquote(cat)}',
-                'SK': f'{unquote(name)}'
+                'PK': f'{unquote(name)}'
             }
         )
         item = response.get('Item')
@@ -46,10 +45,10 @@ def get_name(tablename,cat: str, name: str) -> dict:
     
 router = APIRouter()
 
-@router.get("/database/{tablename}:{cat}:{name}")
-async def get_database_nutrients(tablename: str, cat: str, name: str):
+@router.get("/database/{tablename}:{name}")
+async def get_database_nutrients(tablename: str, name: str):
     try:
-        nutrients = get_name(tablename, cat, name)
+        nutrients = get_name(tablename, name)
         return nutrients
     except HTTPException as http_err:
         # 🔹 이미 발생한 HTTPException은 그대로 반환
