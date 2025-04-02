@@ -1,6 +1,6 @@
 import os
 from internal.database import get_dynamodb
-
+#hi
 # 환경 변수에서 AWS 자격증명 가져오기
 access = {
     "region_ap": os.getenv("AWS_REGION", "ap-northeast-2"),
