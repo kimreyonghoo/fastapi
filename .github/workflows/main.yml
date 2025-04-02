@@ -1,1 +1,27 @@
+name: FastAPI Docker CI/CD
 
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            if [ ! -d "~/fastapi_app" ]; then
+              git clone git@github.com:kimreyonghoo/fastapi.git ~/fastapi_app
+            fi
+            cd ~/fastapi_app
+            git pull origin main
