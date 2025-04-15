@@ -40,8 +40,11 @@ def get_name(tablename, name: str) -> dict:
                 'PK': f'{unquote(name)}'
             }
         )
-        item = response.get('Item')
-        return item.get('nutrients', {})
+        item = response.get('Item', {})
+        return {
+            'nutrients': item.get('nutrients', {}),
+            'qty': item.get('qty', 0)
+        }
     
 router = APIRouter()
 
