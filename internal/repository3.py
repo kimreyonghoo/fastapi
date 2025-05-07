@@ -3,10 +3,16 @@ from fastapi import APIRouter, HTTPException
 from urllib.parse import unquote
 import boto3
 import boto3.resources
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from internal.aws_config import aws_access
+from internal.database import get_table
 import botocore
 import logging
-from internal.database import get_table
+
+
+
 #영양소 목록
 nutr_db=['에너지', '탄수화물', '식이섬유', '단백질', '리놀레산', '알파-리놀렌산', 'EPA+DHA', 
       '메티오닌', '류신', '이소류신', '발린', '라이신', '페닐알라닌+티로신', '트레오닌', '트립토판', '히스티딘', 
@@ -40,6 +46,7 @@ def update_user_nutrition(user_id, new_physique, new_nutr_vector, table_name='us
         print("오류 발생:", e)
         return None
 user=get_table("user",aws_access)
+
 def calculate_bmr(sex, weight, height, age,user:dict):
       #기초대사량 계산
       bmr=0

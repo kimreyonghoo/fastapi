@@ -45,7 +45,7 @@ def get_name(tablename, name: str) -> dict:
             'nutrients': item.get('nutrients', {}),
             'qty': item.get('qty', 0)
         }
-    
+
 router = APIRouter()
 
 @router.get("/database/{tablename}:{name}")
