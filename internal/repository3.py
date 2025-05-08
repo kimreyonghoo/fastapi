@@ -47,13 +47,56 @@ def update_user_nutrition(user_id, new_physique, new_nutr_vector, table_name='us
         return None
 user=get_table("user",aws_access)
 
-def calculate_bmr(sex, weight, height, age,user:dict):
-      #기초대사량 계산
-      bmr=0
-      if sex.lower() == 'male':
-            bmr=10 * weight + 6.25 * height - 5 * age + 5
-      else:
-            bmr=10 * weight + 6.25 * height - 5 * age - 161
-      tdee=bmr*user.pysique.actyvity_level
+def get_rdi_pk(age):
+    if age == 0:
+        return 'RDI#0'
+    elif age in range(1,3):
+        return 'RDI#1-2'
+    elif age in range(3,6):
+        return 'RDI#3-5'
+    elif age in range(6,9):
+        return 'RDI#6-8'
+    elif age in range(9,12):
+        return 'RDI#9-11'
+    elif age in range(12,15):
+        return 'RDI#12-14'
+    elif age in range(15,19):
+        return 'RDI#15-18'
+    elif age in range(19,30):
+        return 'RDI#19-29'
+    elif age in range(30,50):
+        return 'RDI#30-49'
+    elif age in range(50,65):
+        return 'RDI#50-64'
+    elif age in range(65,75):
+        return 'RDI#65-74'
+    elif age >=75:
+        return 'RDI#75-'
+    else:
+        return None
+
+def calculate_bmr(sex: str, weight: float, height: float, age: int, user: dict):
+    """
+    :param sex: 'male' or 'female'
+    :param weight: kg
+    :param height: cm
+    :param age: 나이
+    :param user: {'physique': {'activity_level': float}} 형태의 dict
+    :return: (rdi_key, tdee)
+    """
+
+    # BMR 계산 
+    if sex.lower() == 'male':
+        bmr = 10 * weight + 6.25 * height - 5 * age + 5
+    else:
+        bmr = 10 * weight + 6.25 * height - 5 * age - 161
+
+    # TDEE 계산 
+    activity_level = user.get('physique', {}).get('activity_level', 1.2)  # 기본값: 1.2 (정적 생활)
+    tdee = bmr * activity_level
+
+    rdi_key = get_rdi_pk(age)
+
+    return rdi_key, tdee
 
   
