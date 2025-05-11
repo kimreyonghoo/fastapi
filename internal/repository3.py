@@ -21,7 +21,7 @@ nutr_db=['에너지', '탄수화물', '식이섬유', '단백질', '리놀레산
       '아연', '구리', '망간', '요 오드', '셀레늄', '몰리브덴', '크롬']
 
 
-def update_user_nutrition(user_id, new_physique, new_nutr_vector, table_name='user'):
+def update_user_nutrition(user_id, new_physique, table_name='user'):
     """
     DynamoDB user 테이블의 physique와 nutr_db 항목을 업데이트
     """
@@ -36,7 +36,6 @@ def update_user_nutrition(user_id, new_physique, new_nutr_vector, table_name='us
             UpdateExpression="SET physique = :p, meal.nutr_db = :n",
             ExpressionAttributeValues={
                 ':p': new_physique,
-                ':n': new_nutr_vector
             },
             ReturnValues="UPDATED_NEW"
         )
@@ -48,30 +47,19 @@ def update_user_nutrition(user_id, new_physique, new_nutr_vector, table_name='us
 user=get_table("user",aws_access)
 
 def get_rdi_pk(age):
-    if age == 0:
-        return 'RDI#0'
-    elif age in range(1,3):
-        return 'RDI#1-2'
-    elif age in range(3,6):
-        return 'RDI#3-5'
-    elif age in range(6,9):
-        return 'RDI#6-8'
-    elif age in range(9,12):
-        return 'RDI#9-11'
-    elif age in range(12,15):
-        return 'RDI#12-14'
-    elif age in range(15,19):
-        return 'RDI#15-18'
+    #db에서 권장영양섭취량을 계산하기 위한 키키
+    if age in range(15,19):
+        return '#15-18'
     elif age in range(19,30):
-        return 'RDI#19-29'
+        return '#19-29'
     elif age in range(30,50):
-        return 'RDI#30-49'
+        return '#30-49'
     elif age in range(50,65):
-        return 'RDI#50-64'
+        return '#50-64'
     elif age in range(65,75):
-        return 'RDI#65-74'
+        return '#65-74'
     elif age >=75:
-        return 'RDI#75-'
+        return '#75-'
     else:
         return None
 
@@ -84,7 +72,7 @@ def calculate_bmr(sex: str, weight: float, height: float, age: int, user: dict):
     :param user: {'physique': {'activity_level': float}} 형태의 dict
     :return: (rdi_key, tdee)
     """
-
+    
     # BMR 계산 
     if sex.lower() == 'male':
         bmr = 10 * weight + 6.25 * height - 5 * age + 5
@@ -96,7 +84,7 @@ def calculate_bmr(sex: str, weight: float, height: float, age: int, user: dict):
     tdee = bmr * activity_level
 
     rdi_key = get_rdi_pk(age)
-
-    return rdi_key, tdee
+    rdi=get_table("rdi",aws_access)
+    return tdee
 
   
