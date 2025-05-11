@@ -1,5 +1,6 @@
 
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
+import json
 from fastapi import APIRouter, HTTPException
 from urllib.parse import unquote
 import boto3
@@ -11,21 +12,6 @@ from internal.aws_config import aws_access
 from internal.database import get_table
 import botocore
 import logging
-
-test_user={
-        'PK':'userA',
-        'create_at':'2025-05-11',
-        'sex':'male',
-        'age':'16',
-        'physique':{
-            'height':'176',
-            'weight':'75',
-            'act_level':'1.5'
-            },
-        'nutrition':[2700.0, 130000.0, 30000.0, 65000.0, 14000.0, 1700.0, 230.0, 1400.0, 3200.0, 1400.0, 1800.0,
-                     2900.0, 2600.0, 1500.0, 400.0, 900.0, 0.9, 0.0, 12.0, 0.1, 100.0, 1.3, 1.5, 15.0, 1.5, 0.0, 0.4, 5.0, 
-                     0.0, 900.0, 1200.0, 1500.0, 2300.0, 3500.0, 410.0, 14.0, 10.0, 0.9, 4.0, 0.1, 0.1, 0.0, 0.0]
-    }
 
 #영양소 목록
 nutr_db=['에너지', '탄수화물', '식이섬유', '단백질', '리놀레산', '알파-리놀렌산', 'EPA+DHA', 
@@ -61,57 +47,90 @@ def get_rdi(PK,SK):
             'SK': SK
         }
     )
-    item = response.get('Item')  
-    item = response.get('Item')
+    item = response.get('Item') 
     nutrition = [float(n) for n in item['nutrition']]
-    print(nutrition) 
+    return nutrition
 
-def convert_to_decimal(data):
-    if isinstance(data, list):
-        return [convert_to_decimal(item) for item in data]
-    elif isinstance(data, dict):
-        return {k: convert_to_decimal(v) for k, v in data.items()}
-    elif isinstance(data, float):
-        return Decimal(str(data))
-    else:
+def convert_types(data):
+    if isinstance(data, dict):
+        for k, v in data.items():
+            data[k] = convert_types(v)
         return data
+    elif isinstance(data, list):
+        return [convert_types(i) for i in data]
+    else:
+        try:
+            return Decimal(str(data)).quantize(Decimal('.1'), rounding=ROUND_HALF_UP)
+        except:
+            return data
     
-def put_user(table_name, user_id, user_data):
-    dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table(table_name)
-
-    # Decimal 변환
-    user_data['nutrition'] = convert_to_decimal(user_data['nutrition'])
-
+def put_user_profile(user_id, user_profile_data:dict):
+    table = get_table('user2',aws_access)
     # 저장
     response = table.put_item(
         Item={
-            'user_id': user_id,  # 파티션 키
-            **user_data
+            'PK': f'{user_id}',  # 파티션 키
+            'SK':'profile#',
+            **user_profile_data
         }
     )
     return response
+def get_user_profile():
+    table = get_table('user2',aws_access)
+    response = table.query(
+        KeyConditionExpression='PK = :user_id AND SK = :profile',
+        ExpressionAttributeValues={
+            ':user_id': 'krh6818@naver.com',
+            ':profile': 'profile#'
+        }
+    )
+    return response['Items'][0]
 
+def put_user_meal(user_id, date,user_meal_data:dict):
+    table = get_table('user2',aws_access)
+    user_meal_data['nutrition']=convert_types(user_meal_data['nutrition'])
+    # 저장
+    response = table.put_item(
+        Item={
+            'PK': f'{user_id}',  # 파티션 키
+            'SK': f'meal#{date}',
+            **user_meal_data
+        }
+    )
+    return response    
 
-def calculate_bmr(user: dict):
+def get_user_profile(date):
+    table = get_table('user2',aws_access)
+    response = table.query(
+        KeyConditionExpression='PK = :user_id AND SK = :meal#',
+        ExpressionAttributeValues={
+            ':user_id': 'krh681@naver.com',
+            ':profile': f'meal#{date}'
+        }
+    )
+    return response['Items'][0]
+
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, Decimal):
+            return float(o)
+        return super(DecimalEncoder, self).default(o)
+    
+def calculate_bmr(user: dict):#user['profile']
     """
-    user={
-        'PK':'',
-        'sex':'',
-        'age':'',
-        'physique':{
-            'height':'',
-            'weight':'',
-            'act_level':''
-            },
-        'meal':[
-            {
-                'created_at':'',
-                'nutrition':[]
-            }
-        ]
-        
-    }
+user_profile = {
+
+    'sex': 'male',
+    'age': '16',
+    'physique': {
+        'height': '176',
+        'weight': '75',
+        'act_level': '1.5'
+    },
+}   
+meal_data = {
+    'nutrition': [2700.0, 130000.0, 30000.0],
+}
     """
     # BMR 계산 
     if user['sex'] == 'male':
@@ -125,7 +144,7 @@ def calculate_bmr(user: dict):
 
     rdi_key = get_rdi_pk(user['age']) 
     recommended_rdi = get_rdi(user['sex'], rdi_key) 
-    rdi_calories = recommended_rdi.get('calories')
+    rdi_calories = recommended_rdi[0]
     calorie_ratio = tdee / rdi_calories
     
     recommended_rdi = [value * calorie_ratio if i != 0 else tdee for i, value in enumerate(recommended_rdi)]
