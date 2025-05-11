@@ -92,29 +92,11 @@ def put_user(table_name, user_id, user_data):
     )
     return response
 
-def update_user(update_data, user_id='userA',):
-    table = get_table('user')
 
-    # nutrition 값이 있다면 Decimal로 변환
-    if 'nutrition' in update_data:
-        update_data['nutrition'] = convert_to_decimal(update_data['nutrition'])
-
-    update_expr = "SET " + ", ".join([f"{k} = :{k}" for k in update_data])
-    expr_attr_vals = {f":{k}": v for k, v in update_data.items()}
-
-    response = table.update_item(
-        Key={'PK': user_id},
-        UpdateExpression=update_expr,
-        ExpressionAttributeValues=expr_attr_vals,
-        ReturnValues="UPDATED_NEW"
-    )
-    return response
-
-def calculate_bmr(user: dict):#user.pyshique
+def calculate_bmr(user: dict):
     """
     user={
         'PK':'',
-        'created_at':'',
         'sex':'',
         'age':'',
         'physique':{
@@ -122,7 +104,13 @@ def calculate_bmr(user: dict):#user.pyshique
             'weight':'',
             'act_level':''
             },
-        'nutrition':[]
+        'meal':[
+            {
+                'created_at':'',
+                'nutrition':[]
+            }
+        ]
+        
     }
     """
     # BMR 계산 
