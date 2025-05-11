@@ -80,8 +80,8 @@ def get_user_profile():
     response = table.query(
         KeyConditionExpression='PK = :user_id AND SK = :profile',
         ExpressionAttributeValues={
-            ':user_id': 'krh6818@naver.com',
-            ':profile': 'profile#'
+            ':user_id': 'krh681@naver.com',
+            ':profile': 'profile'
         }
     )
     return response['Items'][0]
@@ -99,7 +99,7 @@ def put_user_meal(user_id, date,user_meal_data:dict):
     )
     return response    
 
-def get_user_profile(date):
+def get_user_meal(date):
     table = get_table('user2',aws_access)
     response = table.query(
         KeyConditionExpression='PK = :user_id AND SK = :meal#',
@@ -132,23 +132,33 @@ meal_data = {
     'nutrition': [2700.0, 130000.0, 30000.0],
 }
     """
+    age = int(user['age'])  # 나이는 정수로 변환
+    weight = float(user['physique']['weight'])
+    height = float(user['physique']['height'])
+    act_level=float(user['physique']['act_level'])
     # BMR 계산 
     if user['sex'] == 'male':
-        bmr = 10 * user['pysique']['weight'] + 6.25 * user['pysique']['height'] - 5 * user['age'] + 5
+        bmr = 10 * weight + 6.25 * height - 5 * age + 5
     else:
-        bmr = 10 * user['pysique']['weight'] + 6.25 * user['pysique']['height'] - 5 * user['age'] - 161
+        bmr = 10 * weight + 6.25 * height - 5 * age - 161
 
     # TDEE 계산 
-    activity_level = user.get('pysique', {}).get('act_level', 1.2)  # 기본값: 1.2 (정적 생활)
-    tdee = bmr * activity_level
+    tdee = bmr * act_level
 
-    rdi_key = get_rdi_pk(user['age']) 
+    rdi_key = get_rdi_pk(age) 
     recommended_rdi = get_rdi(user['sex'], rdi_key) 
     rdi_calories = recommended_rdi[0]
     calorie_ratio = tdee / rdi_calories
-    
-    recommended_rdi = [value * calorie_ratio if i != 0 else tdee for i, value in enumerate(recommended_rdi)]
+    print(recommended_rdi)
+    print(calorie_ratio)
+    recommended_rdi = [
+        int(tdee) if i == 0 else int(value * calorie_ratio)
+        for i, value in enumerate(recommended_rdi)
+]
     #nutr_db의 순서와 동일,0번이 칼로리
     return recommended_rdi
+user=get_user_profile()
+
+print(calculate_bmr(user))
 
   
