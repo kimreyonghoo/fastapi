@@ -110,6 +110,16 @@ def get_user_meal(date):#영양정보 가져오기
     )
     return response['Items'][0]
 
+def del_user_meal(date):  # 영양정보 삭제
+    table = get_table('user2', aws_access)
+
+    response = table.delete_item(
+        Key= {
+            'PK': 'krh681@naver.com',  
+            'SK': f'meal#{date}'       
+        }
+    )
+
 class DecimalEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, Decimal):
