@@ -14,4 +14,5 @@ docker compose down
 1. cd /home/ubuntu/docker_backup
 2. docker save fastapi_app-app | gzip > fastapi_app_backup_(오늘 날짜).tar.gz
 3. aws s3 cp fastapi_app_backup_(오늘 날짜).tar.gz s3://fastapi-app-koreatech-bucket/backups/
-4. s3 이미지 업로드 완료!
+4. s3 이미지 업로드 완료!\
+
