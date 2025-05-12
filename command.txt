@@ -6,7 +6,7 @@ docker compose up
 
 docker compose up --build
 무조건 다시 빌드 후 실행
-
+fdd
 docker compose down
 모든 컨테이너 정지 + 네트워크 정리
 ffs
