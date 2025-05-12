@@ -21,8 +21,8 @@ nutr_db=['에너지', '탄수화물', '식이섬유', '단백질', '리놀레산
       '아연', '구리', '망간', '요 오드', '셀레늄', '몰리브덴', '크롬']
 
 
-def get_rdi_pk(age):
-    #db에서 권장영양섭취량을 계산하기 위한 키키
+def get_rdi_pk(age):#프론트 구현 x
+    #db에서 권장영양섭취량을 계산하기 위한 키
     if age in range(15,19):
         return '15-18'
     elif age in range(19,30):
@@ -38,7 +38,7 @@ def get_rdi_pk(age):
     else:
         return None
 
-def get_rdi(PK,SK):
+def get_rdi(PK,SK):#프론트 구현 x
     table = get_table("rdi", aws_access)
 
     response = table.get_item(
@@ -51,7 +51,7 @@ def get_rdi(PK,SK):
     nutrition = [float(n) for n in item['nutrition']]
     return nutrition
 
-def convert_types(data):
+def convert_types(data):#프론트 구현 x
     if isinstance(data, dict):
         for k, v in data.items():
             data[k] = convert_types(v)
@@ -126,7 +126,7 @@ class DecimalEncoder(json.JSONEncoder):
             return float(o)
         return super(DecimalEncoder, self).default(o)
     
-def calculate_bmr(user: dict):#user['profile']
+def calculate_bmr(user: dict):#user['profile'], 프론트 구현 x
     """
 user_profile = {
 
