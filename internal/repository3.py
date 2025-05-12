@@ -157,8 +157,12 @@ meal_data = {
     rdi_calories = recommended_rdi[0]
     calorie_ratio = tdee / rdi_calories
     
-    recommended_rdi = [value * calorie_ratio if i != 0 else tdee for i, value in enumerate(recommended_rdi)]
+    recommended_rdi = [
+        int(tdee) if i == 0 else int(value * calorie_ratio)
+        for i, value in enumerate(recommended_rdi)
+]
     #nutr_db의 순서와 동일,0번이 칼로리
     return recommended_rdi
+
 
   
