@@ -64,7 +64,7 @@ def convert_types(data):
         except:
             return data
     
-def put_user_profile(user_id, user_profile_data:dict):
+def put_user_profile(user_id, user_profile_data:dict): #유저 프로필 수정정
     table = get_table('user2',aws_access)
     # 저장
     response = table.put_item(
@@ -75,7 +75,7 @@ def put_user_profile(user_id, user_profile_data:dict):
         }
     )
     return response
-def get_user_profile():
+def get_user_profile():#유저 프로필 가져오기기
     table = get_table('user2',aws_access)
     response = table.query(
         KeyConditionExpression='PK = :user_id AND SK = :profile',
@@ -86,7 +86,7 @@ def get_user_profile():
     )
     return response['Items'][0]
 
-def put_user_meal(user_id, date,user_meal_data:dict):
+def put_user_meal(user_id, date,user_meal_data:dict):#영양정보 넣기 @post, '2025-05-11'형식
     table = get_table('user2',aws_access)
     user_meal_data['nutrition']=convert_types(user_meal_data['nutrition'])
     # 저장
@@ -99,7 +99,7 @@ def put_user_meal(user_id, date,user_meal_data:dict):
     )
     return response    
 
-def get_user_profile(date):
+def get_user_meal(date):#영양정보 가져오기
     table = get_table('user2',aws_access)
     response = table.query(
         KeyConditionExpression='PK = :user_id AND SK = :meal#',
@@ -129,7 +129,7 @@ user_profile = {
     },
 }   
 meal_data = {
-    'nutrition': [2700.0, 130000.0, 30000.0],
+    'nutrition': [2700.0, 130000.0, 30000.0]
 }
     """
     # BMR 계산 
