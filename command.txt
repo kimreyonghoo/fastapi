@@ -9,7 +9,7 @@ docker compose up --build
 
 docker compose down
 모든 컨테이너 정지 + 네트워크 정리
-
+ffs
 # 도커 이미지 백업 매뉴얼
 1. cd /home/ubuntu/docker_backup
 2. docker save fastapi_app-app | gzip > fastapi_app_backup_(오늘 날짜).tar.gz
