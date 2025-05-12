@@ -1,6 +1,8 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from s3_service import upload_file_to_s3, delete_all_related_files
-from yolo.detect import run_detection
+# from yolo.detect import run_detection
+from yolo.onnx_detect import run  # onnx_detect.py의 run 함수 사용
+
 import os, json
 from datetime import datetime
 
@@ -32,11 +34,9 @@ async def upload_file(file: UploadFile = File(...)):
             buffer.write(await file.read())
         print(f"📂 파일 저장 완료: {file_path}")
 
-        # ✅ YOLO 분석
-        detection_result = run_detection(
-            img_path=file_path,
-            save_path=result_img_path
-        )
+        # ✅ YOLO 분석 
+        # detection_result = run_detection(img_path=file_path, save_path=result_img_path)
+        detection_result = run(img_path=file_path, save_path=result_img_path, conf_thres=0.3)
 
         # ✅ 분석 결과 JSON 저장
         with open(result_json_path, "w", encoding="utf-8") as f:
