@@ -78,12 +78,12 @@ def put_user_profile(user_id, user_profile_data:dict): #유저 프로필 수정�
         }
     )
     return response
-def get_user_profile():#유저 프로필 가져오기기
+def get_user_profile(userid):#유저 프로필 가져오기기
     table = get_table('user',aws_access)
     response = table.query(
         KeyConditionExpression='PK = :user_id AND SK = :profile',
         ExpressionAttributeValues={
-            ':user_id': 'test@naver.com',
+            ':user_id': f'{userid}',
             ':profile': 'profile'
         }
     )
@@ -155,17 +155,20 @@ meal_data = {
     """
     # BMR 계산 
     user=get_user_profile(userid)
-    
+
+    weight = float(user['physique']['weight'])  # 몸무게
+    height = float(user['physique']['height'])  # 키
+    age = int(user['age'])                      # 나이
+    act_level=float(user['physique']['act_level'])
     if user['sex'] == 'male':
-        bmr = 10 * user['pysique']['weight'] + 6.25 * user['pysique']['height'] - 5 * user['age'] + 5
+        bmr = 10 * weight + 6.25 * height - 5 * age + 5
     else:
-        bmr = 10 * user['pysique']['weight'] + 6.25 * user['pysique']['height'] - 5 * user['age'] - 161
+        bmr = 10 * weight + 6.25 * height - 5 * age - 161
 
     # TDEE 계산 
-    activity_level = user.get('pysique', {}).get('act_level', 1.2)  # 기본값: 1.2 (정적 생활)
-    tdee = bmr * activity_level
+    tdee = bmr * act_level
 
-    rdi_key = get_rdi_pk(user['age']) 
+    rdi_key = get_rdi_pk(age) 
     recommended_rdi = get_rdi(user['sex'], rdi_key) 
     rdi_calories = recommended_rdi[0]
     calorie_ratio = tdee / rdi_calories
@@ -234,7 +237,8 @@ def recommend_suppl(userid):
         result[f"category#{cat}"] = [item for item, _ in top_items]
 
     return result
-    
+
+
 
 
 
