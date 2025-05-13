@@ -7,6 +7,8 @@ import boto3
 import boto3.resources
 import sys
 import os
+import pandas as pd
+import numpy as np
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from internal.aws_config import aws_access
 from internal.database import get_table
@@ -165,5 +167,3 @@ meal_data = {
     #nutr_db의 순서와 동일,0번이 칼로리
     return recommended_rdi
 
-
-  
