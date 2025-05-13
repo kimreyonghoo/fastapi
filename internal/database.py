@@ -13,7 +13,7 @@ from typing import Dict
 from uuid import uuid4
 from datetime import datetime
 
-from repository3 import recommend_suppl
+from internal.repository3 import recommend_suppl
 
 def get_dynamodb(access:dict):
     dynamodb = boto3.client(

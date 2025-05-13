@@ -11,7 +11,7 @@ import pandas as pd
 import numpy as np
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from internal.aws_config import aws_access
-from internal.database import get_table
+
 import botocore
 import logging
 from sklearn.metrics.pairwise import cosine_similarity
@@ -23,7 +23,32 @@ nutr_db=['에너지', '탄수화물', '식이섬유', '단백질', '리놀레산
       '비타민B12', '엽산', '판토텐산', '비오틴', '칼슘', '인', '나트륨', '염소', '칼륨', '마그네슘', '철', 
       '아연', '구리', '망간', '요 오드', '셀레늄', '몰리브덴', '크롬']
 
+def get_dynamodb(access:dict):
+    dynamodb = boto3.client(
+        'dynamodb',
+        region_name=access['region_ap'],
+        aws_access_key_id=access['aws_access_key_id'],
+        aws_secret_access_key=access['aws_secret_access_key']
+    )
+    print('get DynamoDB')
+    return dynamodb
 
+def get_table(table_name:str, access:dict):
+    db_resource = boto3.resource(
+        'dynamodb',
+        region_name = access['region_ap'],
+        aws_access_key_id=access['aws_access_key_id'],
+        aws_secret_access_key=access['aws_secret_access_key']
+    )
+    print('get DynamoDB resource')
+    try:
+        table = db_resource.Table(table_name)
+        print(f'get {table.table_name} Table')
+        return table
+    except botocore.exceptions.ClientError as e:
+        logging.error(e)
+        print(f'no {table_name} table')
+        return None
 def get_rdi_pk(age):#프론트 구현 x
     #db에서 권장영양섭취량을 계산하기 위한 키
     if age in range(15,19):
