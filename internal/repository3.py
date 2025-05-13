@@ -166,4 +166,16 @@ meal_data = {
 ]
     #nutr_db의 순서와 동일,0번이 칼로리
     return recommended_rdi
+user_profile = {
+
+    'sex': 'male',
+    'age': '16',
+    'physique': {
+        'height': '176',
+        'weight': '75',
+        'act_level': '1.5'# 일상적 생활만 한다-1.2 가벼운 운동을 주 1-3회-1.5 주 3-5 일 운동을 한다(헬스) -1.725 강도높은 운동이나 육체노동- 1.9 
+    },
+}  
+put_user_profile("test@naver.com",user_profile)
+recom_suppl("krh6818")
 
