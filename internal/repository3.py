@@ -123,13 +123,21 @@ def del_user_meal(date):  # 영양정보 삭제
         }
     )
 
+def convert_decimals(obj):
+    if isinstance(obj, list):
+        return [convert_decimals(i) for i in obj]
+    elif isinstance(obj, Decimal):
+        return float(obj)
+    else:
+        return obj
+
 class DecimalEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, Decimal):
             return float(o)
         return super(DecimalEncoder, self).default(o)
     
-def calculate_bmr(user: dict):#user['profile'], 프론트 구현 x
+def cal_deficiency(userid):#user['profile'], 프론트 구현 x
     """
 user_profile = {
 
@@ -146,6 +154,8 @@ meal_data = {
 }
     """
     # BMR 계산 
+    user=get_user_profile(userid)
+    
     if user['sex'] == 'male':
         bmr = 10 * user['pysique']['weight'] + 6.25 * user['pysique']['height'] - 5 * user['age'] + 5
     else:
@@ -163,19 +173,12 @@ meal_data = {
     recommended_rdi = [
         int(tdee) if i == 0 else int(value * calorie_ratio)
         for i, value in enumerate(recommended_rdi)
-]
-    #nutr_db의 순서와 동일,0번이 칼로리
-    return recommended_rdi
-
-def convert_decimals(obj):
-    if isinstance(obj, list):
-        return [convert_decimals(i) for i in obj]
-    elif isinstance(obj, Decimal):
-        return float(obj)
-    else:
-        return obj
+    ]
     
-def recom_suppl(userid):
+    
+    total_nutrition = [0.0] * len(nutr_db)
+    count = 0
+    
     KST = timezone(timedelta(hours=9))
     today= datetime.now(KST).date()
     start_date = today - timedelta(days=6)
@@ -193,64 +196,49 @@ def recom_suppl(userid):
         if "nutrition" in item:
             item["nutrition"] = convert_decimals(item["nutrition"])
             
-    print(response["Items"])
-   
-
-def convert_decimals(obj):
-    if isinstance(obj, list):
-        return [convert_decimals(i) for i in obj]
-    elif isinstance(obj, Decimal):
-        return float(obj)
-    else:
-        return obj
+    for item in response['Items']:
+        if 'nutrition' in item:
+            nut = convert_decimals(item['nutrition'])
+            total_nutrition = [a + b for a, b in zip(total_nutrition, nut)]
+            count += 1
+    avg_nutrition = [x / count for x in total_nutrition] if count else [0.0] * len(nutr_db)
     
-def recom_suppl(userid):
-    KST = timezone(timedelta(hours=9))
-    today= datetime.now(KST).date()
-    start_date = today - timedelta(days=6)
+    #nutr_db의 순서와 동일,0번이 칼로리
+    deficiency = [max(r - a, 0.0) for r, a in zip(recommended_rdi, avg_nutrition)]
+    return deficiency#최종 결핍수치(평균값)
+ 
+def recommend_suppl(userid):
+    categories = ["vitamin", "iron", "magnesium", "calcium"]
+    result = {}
 
-    table=get_table("user",aws_access)
-    response = table.query(
-        KeyConditionExpression='PK = :pk AND SK BETWEEN :start AND :end',
-        ExpressionAttributeValues={
-            ':pk': f'{userid}',
-            ':start': f"meal#{start_date.isoformat()}",
-            ':end': f"meal#{today.isoformat()}"
-        }
-    )
-    for item in response["Items"]:  
-        if "nutrition" in item:
-            item["nutrition"] = convert_decimals(item["nutrition"])
-    
-    # 각 카테고리별 인덱스 수집
-    category_indices = defaultdict(list)
-    for i, nutr in enumerate(nutr_db):
-        
-        if category:
-            category_indices[category].append(i)
+    # 사용자 부족량 벡터 계산
+    deficiency_vector = cal_deficiency(userid)
 
-    # numpy 배열로 변환
-    user_vector_np = np.array(user_vector).reshape(1, -1)
+    for cat in categories:
+        table = get_table(cat, aws_access)
+        items = table.scan()['Items']
+        ranked = []
 
-    for category, indices in category_indices.items():
-        sub_user_vector = user_vector_np[:, indices]  # 사용자 해당 카테고리 벡터
+        for item in items:
+            if 'nutrition' in item:
+                product_vector = np.array(convert_decimals(item['nutrition']))
+                similarity = cosine_similarity([deficiency_vector], [product_vector])[0][0]
+                ranked.append((item, similarity))
 
-        # 각 영양제에 대해 해당 카테고리 벡터 추출 + 유사도 계산
-        sims = []
-        for supplement in supplements:
-            name = supplement["name"]
-            supp_vector = np.array(supplement["vector"])[indices].reshape(1, -1)
-            # 유사도 계산 (제로 벡터인 경우 예외 처리)
-            if np.linalg.norm(supp_vector) == 0 or np.linalg.norm(sub_user_vector) == 0:
-                similarity = 0.0
-            else:
-                similarity = cosine_similarity(supp_vector, sub_user_vector)[0][0]
-            sims.append((name, similarity))
+        # 유사도 기준으로 정렬 후 상위 5개
+        top_items = sorted(ranked, key=lambda x: x[1], reverse=True)[:5]
 
-        # 유사도 높은 순 정렬 후 상위 top_n 추출
-        sims.sort(key=lambda x: x[1], reverse=True)
-        result[category] = sims[:5]
+        # category key: category#{cat} 형식으로 저장
+        result[f"category#{cat}"] = [item for item, _ in top_items]
 
     return result
+    
+
+
+
+
+    
+    
+
     
     
