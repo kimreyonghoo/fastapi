@@ -221,7 +221,9 @@ def recommend_suppl(userid):
 
         for item in items:
             if 'nutrition' in item:
-                product_vector = np.array(convert_decimals(item['nutrition']))
+                nutrition_vector=convert_decimals(item['nutrition'])
+                item['nutrition']=nutrition_vector
+                product_vector = np.array(nutrition_vector)
                 similarity = cosine_similarity([deficiency_vector], [product_vector])[0][0]
                 ranked.append((item, similarity))
 
