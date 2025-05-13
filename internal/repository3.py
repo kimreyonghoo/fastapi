@@ -238,9 +238,8 @@ def recommend_suppl(userid):
 
     return result
 
-# 데이터를 보기 좋은 형식으로 변환 후 출력
-nutrition_data=recommend_suppl("test@koreatech.ac.kr")
-print(json.dumps(nutrition_data, indent=4, ensure_ascii=False,cls=DecimalEncoder))
+
+
 
 
 
