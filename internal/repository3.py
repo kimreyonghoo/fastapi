@@ -104,7 +104,7 @@ def get_user_meal(date):#영양정보 가져오기
     response = table.query(
         KeyConditionExpression='PK = :user_id AND SK = :meal#',
         ExpressionAttributeValues={
-            ':user_id': 'krh681@naver.com',
+            ':user_id': 'krh6818@naver.com',
             ':profile': f'meal#{date}'
         }
     )
@@ -115,7 +115,7 @@ def del_user_meal(date):  # 영양정보 삭제
 
     response = table.delete_item(
         Key= {
-            'PK': 'krh681@naver.com',  
+            'PK': 'krh6818@naver.com',  
             'SK': f'meal#{date}'       
         }
     )

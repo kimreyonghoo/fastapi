@@ -86,9 +86,8 @@ async def save_nutrient_data(
 
         item = {
             'PK': data.user_id,           # 예: "junho"
-            'SK': data.date,              # 예: "2025-05-06"
+            'SK': f'meal#{data.date}',              # 예: "2025-05-06"
             'nutrients': nutrients_decimal,
-            'created_at': datetime.utcnow().isoformat()
         }
 
         table.put_item(Item=item)
