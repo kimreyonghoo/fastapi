@@ -101,7 +101,7 @@ async def save_nutrient_data(
 class NutrientDeleteRequest(BaseModel):
     user_id: str
     date: str
-    nutrients: Dict[str, float]
+
 
 @router.post("/database/{tablename}/delete")
 async def delete_nutrient_data(
