@@ -12,6 +12,7 @@ from internal.aws_config import aws_access
 from internal.database import get_table
 import botocore
 import logging
+from sklearn.metrics.pairwise import cosine_similarity
 
 #영양소 목록
 nutr_db=['에너지', '탄수화물', '식이섬유', '단백질', '리놀레산', '알파-리놀렌산', 'EPA+DHA', 
