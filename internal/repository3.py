@@ -83,8 +83,8 @@ def get_user_profile():#유저 프로필 가져오기기
     response = table.query(
         KeyConditionExpression='PK = :user_id AND SK = :profile',
         ExpressionAttributeValues={
-            ':user_id': 'krh6818@naver.com',
-            ':profile': 'profile#'
+            ':user_id': 'test@naver.com',
+            ':profile': 'profile'
         }
     )
     return response['Items'][0]
@@ -190,8 +190,8 @@ def recom_suppl(userid):
         }
     )
     for item in response["Items"]:  
-        if "nutrients" in item:
-            item["nutrients"] = convert_decimals(item["nutrients"])
+        if "nutrition" in item:
+            item["nutrition"] = convert_decimals(item["nutrition"])
             
     print(response["Items"])
    
@@ -221,19 +221,36 @@ def recom_suppl(userid):
     for item in response["Items"]:  
         if "nutrients" in item:
             item["nutrients"] = convert_decimals(item["nutrients"])
-            
-    print(response["Items"])
-   
     
-user_profile = {
+    # 각 카테고리별 인덱스 수집
+    category_indices = defaultdict(list)
+    for i, nutr in enumerate(nutr_db):
+        
+        if category:
+            category_indices[category].append(i)
 
-    'sex': 'male',
-    'age': '16',
-    'physique': {
-        'height': '176',
-        'weight': '75',
-        'act_level': '1.5'# 일상적 생활만 한다-1.2 가벼운 운동을 주 1-3회-1.5 주 3-5 일 운동을 한다(헬스) -1.725 강도높은 운동이나 육체노동- 1.9 
-    },
-}  
-put_user_profile("test@naver.com",user_profile)
-recom_suppl("krh6818")
+    # numpy 배열로 변환
+    user_vector_np = np.array(user_vector).reshape(1, -1)
+
+    for category, indices in category_indices.items():
+        sub_user_vector = user_vector_np[:, indices]  # 사용자 해당 카테고리 벡터
+
+        # 각 영양제에 대해 해당 카테고리 벡터 추출 + 유사도 계산
+        sims = []
+        for supplement in supplements:
+            name = supplement["name"]
+            supp_vector = np.array(supplement["vector"])[indices].reshape(1, -1)
+            # 유사도 계산 (제로 벡터인 경우 예외 처리)
+            if np.linalg.norm(supp_vector) == 0 or np.linalg.norm(sub_user_vector) == 0:
+                similarity = 0.0
+            else:
+                similarity = cosine_similarity(supp_vector, sub_user_vector)[0][0]
+            sims.append((name, similarity))
+
+        # 유사도 높은 순 정렬 후 상위 top_n 추출
+        sims.sort(key=lambda x: x[1], reverse=True)
+        result[category] = sims[:5]
+
+    return result
+    
+    

@@ -66,7 +66,7 @@ async def get_database_nutrients(tablename: str, name: str):
         raise http_err
 
 # 영양정보(날짜) flutter -> dynamodb에 저장
-class NutrientSaveRequest(BaseModel):
+class NutritionSaveRequest(BaseModel):
     user_id: str 
     date: str  # 예: "2025-05-01"
     nutrients: list[float]
@@ -74,7 +74,7 @@ class NutrientSaveRequest(BaseModel):
 @router.post("/database/{tablename}/save")
 async def save_nutrient_data(
     tablename: str,
-    data: NutrientSaveRequest = Body(...)
+    data: NutritionSaveRequest = Body(...)
 ):
     try:
         table = get_table(tablename, aws_access)
@@ -82,12 +82,12 @@ async def save_nutrient_data(
             raise HTTPException(status_code=404, detail="테이블을 찾을 수 없습니다.")
 
         # float → Decimal로 변환
-        nutrients_decimal = [Decimal(str(v)) for v in data.nutrients]
+        nutrition_decimal = [Decimal(str(v)) for v in data.nutrition]
 
         item = {
             'PK': data.user_id,           # 예: "junho"
             'SK': f'meal#{data.date}',              # 예: "2025-05-06"
-            'nutrients': nutrients_decimal
+            'nutrition': nutrition_decimal
         }
 
         table.put_item(Item=item)
@@ -98,7 +98,7 @@ async def save_nutrient_data(
         raise HTTPException(status_code=500, detail="DynamoDB 저장 중 오류 발생")
 
 # 영양정보 삭제
-class NutrientDeleteRequest(BaseModel):
+class NutritionDeleteRequest(BaseModel):
     user_id: str
     date: str
 
@@ -106,7 +106,7 @@ class NutrientDeleteRequest(BaseModel):
 @router.post("/database/{tablename}/delete")
 async def delete_nutrient_data(
     tablename: str,
-    data: NutrientDeleteRequest = Body(...)
+    data: NutritionDeleteRequest = Body(...)
 ):
     try:
         table = get_table(tablename, aws_access)
