@@ -15,7 +15,7 @@ from internal.database import get_table
 import botocore
 import logging
 from sklearn.metrics.pairwise import cosine_similarity
-
+from datetime import datetime, timedelta, timezone
 #영양소 목록
 nutr_db=['에너지', '탄수화물', '식이섬유', '단백질', '리놀레산', '알파-리놀렌산', 'EPA+DHA', 
       '메티오닌', '류신', '이소류신', '발린', '라이신', '페닐알라닌+티로신', '트레오닌', '트립토판', '히스티딘', 
@@ -68,7 +68,7 @@ def convert_types(data):#프론트 구현 x
             return data
     
 def put_user_profile(user_id, user_profile_data:dict): #유저 프로필 수정정
-    table = get_table('user2',aws_access)
+    table = get_table('user',aws_access)
     # 저장
     response = table.put_item(
         Item={
@@ -79,7 +79,7 @@ def put_user_profile(user_id, user_profile_data:dict): #유저 프로필 수정�
     )
     return response
 def get_user_profile():#유저 프로필 가져오기기
-    table = get_table('user2',aws_access)
+    table = get_table('user',aws_access)
     response = table.query(
         KeyConditionExpression='PK = :user_id AND SK = :profile',
         ExpressionAttributeValues={
@@ -90,7 +90,7 @@ def get_user_profile():#유저 프로필 가져오기기
     return response['Items'][0]
 
 def put_user_meal(user_id, date,user_meal_data:dict):#영양정보 넣기 @post, '2025-05-11'형식
-    table = get_table('user2',aws_access)
+    table = get_table('user',aws_access)
     user_meal_data['nutrition']=convert_types(user_meal_data['nutrition'])
     # 저장
     response = table.put_item(
@@ -103,7 +103,7 @@ def put_user_meal(user_id, date,user_meal_data:dict):#영양정보 넣기 @post,
     return response    
 
 def get_user_meal(date):#영양정보 가져오기
-    table = get_table('user2',aws_access)
+    table = get_table('user',aws_access)
     response = table.query(
         KeyConditionExpression='PK = :user_id AND SK = :meal#',
         ExpressionAttributeValues={
@@ -114,7 +114,7 @@ def get_user_meal(date):#영양정보 가져오기
     return response['Items'][0]
 
 def del_user_meal(date):  # 영양정보 삭제
-    table = get_table('user2', aws_access)
+    table = get_table('user', aws_access)
 
     response = table.delete_item(
         Key= {
@@ -138,7 +138,7 @@ user_profile = {
     'physique': {
         'height': '176',
         'weight': '75',
-        'act_level': '1.5'
+        'act_level': '1.5'# 일상적 생활만 한다-1.2 가벼운 운동을 주 1-3회-1.5 주 3-5 일 운동을 한다(헬스) -1.725 강도높은 운동이나 육체노동- 1.9 
     },
 }   
 meal_data = {
@@ -166,6 +166,65 @@ meal_data = {
 ]
     #nutr_db의 순서와 동일,0번이 칼로리
     return recommended_rdi
+
+def convert_decimals(obj):
+    if isinstance(obj, list):
+        return [convert_decimals(i) for i in obj]
+    elif isinstance(obj, Decimal):
+        return float(obj)
+    else:
+        return obj
+    
+def recom_suppl(userid):
+    KST = timezone(timedelta(hours=9))
+    today= datetime.now(KST).date()
+    start_date = today - timedelta(days=6)
+
+    table=get_table("user",aws_access)
+    response = table.query(
+        KeyConditionExpression='PK = :pk AND SK BETWEEN :start AND :end',
+        ExpressionAttributeValues={
+            ':pk': f'{userid}',
+            ':start': f"meal#{start_date.isoformat()}",
+            ':end': f"meal#{today.isoformat()}"
+        }
+    )
+    for item in response["Items"]:  
+        if "nutrients" in item:
+            item["nutrients"] = convert_decimals(item["nutrients"])
+            
+    print(response["Items"])
+   
+
+def convert_decimals(obj):
+    if isinstance(obj, list):
+        return [convert_decimals(i) for i in obj]
+    elif isinstance(obj, Decimal):
+        return float(obj)
+    else:
+        return obj
+    
+def recom_suppl(userid):
+    KST = timezone(timedelta(hours=9))
+    today= datetime.now(KST).date()
+    start_date = today - timedelta(days=6)
+
+    table=get_table("user",aws_access)
+    response = table.query(
+        KeyConditionExpression='PK = :pk AND SK BETWEEN :start AND :end',
+        ExpressionAttributeValues={
+            ':pk': f'{userid}',
+            ':start': f"meal#{start_date.isoformat()}",
+            ':end': f"meal#{today.isoformat()}"
+        }
+    )
+    for item in response["Items"]:  
+        if "nutrients" in item:
+            item["nutrients"] = convert_decimals(item["nutrients"])
+            
+    print(response["Items"])
+   
+    
 user_profile = {
 
     'sex': 'male',
@@ -178,4 +237,3 @@ user_profile = {
 }  
 put_user_profile("test@naver.com",user_profile)
 recom_suppl("krh6818")
-
