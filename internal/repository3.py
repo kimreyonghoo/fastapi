@@ -219,8 +219,8 @@ def recom_suppl(userid):
         }
     )
     for item in response["Items"]:  
-        if "nutrients" in item:
-            item["nutrients"] = convert_decimals(item["nutrients"])
+        if "nutrition" in item:
+            item["nutrition"] = convert_decimals(item["nutrition"])
     
     # 각 카테고리별 인덱스 수집
     category_indices = defaultdict(list)
