@@ -56,7 +56,7 @@ def get_name(tablename, name: str) -> dict:
     
 router = APIRouter()
 
-@router.get("/database/{tablename}:{name}")
+@router.get("/database/{tablename}:{name}")#음식 정보 가져오기 tablename:food_data
 async def get_database_nutrients(tablename: str, name: str):
     try:
         nutrients = get_name(tablename, name)
