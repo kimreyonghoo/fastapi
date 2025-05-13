@@ -115,7 +115,7 @@ async def delete_nutrient_data(
 
         key = {
             'PK': data.user_id,
-            'SK': data.date
+            'SK': f'meal#{data.date}'
         }
 
         response = table.get_item(Key=key)
