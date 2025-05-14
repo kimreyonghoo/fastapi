@@ -131,7 +131,7 @@ async def delete_nutrient_data(
         logging.error(f"DynamoDB 삭제 실패: {e}")
         raise HTTPException(status_code=500, detail="DynamoDB 삭제 중 오류 발생")
     
-@router.get("/supplemnents/recommend/{userid}")
+@router.get("/supplements/recommend/{userid}")
 async def recommend_supplements(userid: str):
     result = recommend_suppl(userid)
     return result
