@@ -257,11 +257,11 @@ def recommend_suppl(userid):
 
         # 유사도 기준으로 정렬 후 상위 5개
         top_items = sorted(ranked, key=lambda x: x[1], reverse=True)[:5]
-
+        print(f"Item: {item}, Similarity: {similarity:.4f}")
         # category key: category#{cat} 형식으로 저장
         result[f"category#{cat}"] = [item for item, _ in top_items]
 
-    return ranked
+    return result
 
 
 
