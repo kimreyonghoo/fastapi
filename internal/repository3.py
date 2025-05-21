@@ -98,7 +98,7 @@ def put_user_profile(user_id, user_profile_data:dict): #유저 프로필 수정�
     response = table.put_item(
         Item={
             'PK': f'{user_id}',  # 파티션 키
-            'SK':'profile#',
+            'SK':'profile',
             **user_profile_data
         }
     )

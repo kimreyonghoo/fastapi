@@ -144,7 +144,7 @@ class userProfileData(BaseModel):
     act_level: str
 
 
-@router.post("/database/user/profile")#수정/유저 등록 모두 사용
+@router.post("/database/user/profile")
 async def save_user_profile(userid:str,
     user: userProfileData = Body(...)):
 
@@ -154,8 +154,25 @@ async def save_user_profile(userid:str,
     response = table.put_item(
         Item={
             'PK': f'{userid}',  # 파티션 키
-            'SK':'profile#',
+            'SK':'profile',
             **dict(user)
         }
+    )
+    return response
+
+@router.post("/database/user/register")
+async def register_user_profile(userid:str,
+    user: userProfileData = Body(...)):
+
+    #유저 프로필 수정정
+    table = get_table('user',aws_access)
+    # 저장
+    response = table.put_item(
+        Item={
+            'PK': f'{userid}',  # 파티션 키
+            'SK':'profile',
+            **dict(user)
+        },
+        ConditionExpression='attribute_not_exists(userid)'  # 조건: userid가 존재하지 않아야 저장
     )
     return response
