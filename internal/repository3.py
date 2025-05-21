@@ -194,7 +194,7 @@ meal_data = {
     tdee = bmr * act_level
 
     rdi_key = get_rdi_pk(age) 
-    recommended_rdi = get_rdi(float(user['gender']), rdi_key) 
+    recommended_rdi = get_rdi(user['gender'], rdi_key) 
     rdi_calories = recommended_rdi[0]
     calorie_ratio = tdee / rdi_calories
     
