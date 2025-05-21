@@ -75,7 +75,7 @@ def get_rdi(PK,SK):#프론트 구현 x
             'SK': SK
         }
     )
-    item = response.get('Item') 
+    item = response.get('Items') 
     nutrition = [float(n) for n in item['nutrition']]
     return nutrition
 
@@ -193,7 +193,7 @@ meal_data = {
     tdee = bmr * act_level
 
     rdi_key = get_rdi_pk(age) 
-    recommended_rdi = get_rdi(float(user['age']), rdi_key) 
+    recommended_rdi = get_rdi(float(user['gender']), rdi_key) 
     rdi_calories = recommended_rdi[0]
     calorie_ratio = tdee / rdi_calories
     
