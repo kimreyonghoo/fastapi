@@ -155,7 +155,7 @@ async def save_user_profile(userid:str,
         Item={
             'PK': f'{userid}',  # 파티션 키
             'SK':'profile#',
-            **user
+            **dict(user)
         }
     )
     return response
