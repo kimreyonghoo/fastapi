@@ -136,6 +136,14 @@ async def recommend_supplements(userid: str):
     result = recommend_suppl(userid)
     return result
 
+class NutritionDeleteRequest(BaseModel):
+    gender:str
+    age: str
+    height: str
+    weight: str
+    act_level: str
+
+
 @router.post("/database/user/profile")#수정/유저 등록 모두 사용
 async def save_user_profile(userid:str,user:dict):
     #유저 프로필 수정정
