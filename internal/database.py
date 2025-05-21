@@ -78,8 +78,8 @@ async def save_nutrient_data(
     tablename: str,
     data: NutritionSaveRequest = Body(...)
 ):
+    print(data)
     try:
-        print("딕셔너리 형태로:", data.dict())
         table = get_table(tablename, aws_access)
         if not table:
             raise HTTPException(status_code=404, detail="테이블을 찾을 수 없습니다.")
