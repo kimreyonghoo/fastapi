@@ -5,7 +5,7 @@ import boto3.resources
 from internal.aws_config import aws_access
 import botocore
 import logging
-
+from botocore.exceptions import ClientError
 from fastapi import Body
 from pydantic import BaseModel
 from decimal import Decimal
@@ -163,16 +163,22 @@ async def save_user_profile(userid:str,
 @router.post("/database/user/register")
 async def register_user_profile(userid:str,
     user: userProfileData = Body(...)):
-
-    #유저 프로필 수정정
-    table = get_table('user',aws_access)
-    # 저장
-    response = table.put_item(
-        Item={
+    try:
+        #유저 프로필 수정정
+        table = get_table('user',aws_access)
+        # 저장
+        response = table.put_item(
+            Item={
             'PK': f'{userid}',  # 파티션 키
             'SK':'profile',
             **dict(user)
-        },
-        ConditionExpression='attribute_not_exists(userid)'  # 조건: userid가 존재하지 않아야 저장
-    )
-    return response
+            },
+            ConditionExpression='attribute_not_exists(userid)'  # 조건: userid가 존재하지 않아야 저장
+        )
+        return {"status": "success", "message": "User registered successfully."}
+    except ClientError as e:
+        if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
+            # 프론트엔드에서 알 수 있도록 409 Conflict와 커스텀 메시지 전달
+            raise HTTPException(status_code=409, detail="UserID already exists.")
+        else:
+            raise HTTPException(status_code=500, detail="Unexpected error occurred.")
