@@ -161,24 +161,22 @@ async def save_user_profile(userid:str,
     return response
 
 @router.post("/database/user/register")
-async def register_user_profile(userid:str,
-    user: userProfileData = Body(...)):
+async def register_user_profile(userid: str, user: userProfileData = Body(...)):
     try:
-        #유저 프로필 수정정
-        table = get_table('user',aws_access)
-        # 저장
+        table = get_table('user', aws_access)
+        
         response = table.put_item(
             Item={
-            'PK': f'{userid}',  # 파티션 키
-            'SK':'profile',
-            **dict(user)
+                'PK': f'{userid}',  # 파티션 키
+                'SK': 'profile',    # 정렬 키
+                **dict(user)
             },
-            ConditionExpression='attribute_not_exists(userid)'  # 조건: userid가 존재하지 않아야 저장
+            ConditionExpression='attribute_not_exists(PK)'  # PK가 존재하지 않아야 등록
         )
         return {"status": "success", "message": "User registered successfully."}
+    
     except ClientError as e:
         if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
-            # 프론트엔드에서 알 수 있도록 409 Conflict와 커스텀 메시지 전달
             raise HTTPException(status_code=409, detail="UserID already exists.")
         else:
             raise HTTPException(status_code=500, detail="Unexpected error occurred.")
