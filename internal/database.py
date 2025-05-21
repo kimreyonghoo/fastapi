@@ -71,7 +71,7 @@ async def get_database_nutrients(tablename: str, name: str):
 class NutritionSaveRequest(BaseModel):
     user_id: str 
     date: str  # 예: "2025-05-01"
-    nutrition: list[float]
+    nutrients: list[float]
 
 @router.post("/database/{tablename}/save")
 async def save_nutrient_data(
