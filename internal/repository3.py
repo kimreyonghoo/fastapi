@@ -76,6 +76,7 @@ def get_rdi(PK,SK):#프론트 구현 x
         }
     )
     item = response.get('Items') 
+    print(item)
     nutrition = [float(n) for n in item['nutrition']]
     return nutrition
 
