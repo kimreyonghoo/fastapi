@@ -131,7 +131,21 @@ async def delete_nutrient_data(
         logging.error(f"DynamoDB 삭제 실패: {e}")
         raise HTTPException(status_code=500, detail="DynamoDB 삭제 중 오류 발생")
     
-@router.get("/supplements/recommend/{userid}")
+@router.get("/supplements/recommend/{userid}")#영양제 추천
 async def recommend_supplements(userid: str):
     result = recommend_suppl(userid)
     return result
+
+@router.post("/database/user/profile")#수정/유저 등록 모두 사용
+async def save_user_profile(userid:str,user:dict):
+    #유저 프로필 수정정
+    table = get_table('user',aws_access)
+    # 저장
+    response = table.put_item(
+        Item={
+            'PK': f'{userid}',  # 파티션 키
+            'SK':'profile#',
+            **user
+        }
+    )
+    return response

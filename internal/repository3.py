@@ -103,6 +103,7 @@ def put_user_profile(user_id, user_profile_data:dict): #유저 프로필 수정�
         }
     )
     return response
+
 def get_user_profile(userid):#유저 프로필 가져오기기
     table = get_table('user',aws_access)
     response = table.query(
@@ -165,15 +166,13 @@ class DecimalEncoder(json.JSONEncoder):
 def cal_deficiency(userid):#user['profile'], 프론트 구현 x
     """
 user_profile = {
-
-    'sex': 'male',
+    'gender': 'male',
     'age': '16',
-    'physique': {
-        'height': '176',
-        'weight': '75',
-        'act_level': '1.5'# 일상적 생활만 한다-1.2 가벼운 운동을 주 1-3회-1.5 주 3-5 일 운동을 한다(헬스) -1.725 강도높은 운동이나 육체노동- 1.9 
-    },
-}   
+    'height': '176',
+    'weight': '75',
+    'act_level': '1.5'# 일상적 생활만 한다-1.2 가벼운 운동을 주 1-3회-1.5 주 3-5 일 운동을 한다(헬스) -1.725 강도높은 운동이나 육체노동- 1.9 
+}  
+ 
 meal_data = {
     'nutrition': [2700.0, 130000.0, 30000.0]
 }
@@ -181,11 +180,11 @@ meal_data = {
     # BMR 계산 
     user=get_user_profile(userid)
 
-    weight = float(user['physique']['weight'])  # 몸무게
-    height = float(user['physique']['height'])  # 키
+    weight = float(user['weight'])  # 몸무게
+    height = float(user['height'])  # 키
     age = int(user['age'])                      # 나이
-    act_level=float(user['physique']['act_level'])
-    if user['sex'] == 'male':
+    act_level=float(user['act_level'])
+    if user['gender'] == 'male':
         bmr = 10 * weight + 6.25 * height - 5 * age + 5
     else:
         bmr = 10 * weight + 6.25 * height - 5 * age - 161
@@ -194,7 +193,7 @@ meal_data = {
     tdee = bmr * act_level
 
     rdi_key = get_rdi_pk(age) 
-    recommended_rdi = get_rdi(user['sex'], rdi_key) 
+    recommended_rdi = get_rdi(user['gender'], rdi_key) 
     rdi_calories = recommended_rdi[0]
     calorie_ratio = tdee / rdi_calories
     
@@ -256,7 +255,7 @@ def recommend_suppl(userid):
                 ranked.append((item, similarity))
 
         # 유사도 기준으로 정렬 후 상위 5개
-        top_items = sorted(ranked, key=lambda x: x[1], reverse=True)[:5]
+        top_items = sorted(ranked, key=lambda x: x[1], reverse=True)[:6]
         
         # category key: category#{cat} 형식으로 저장
         result[f"category#{cat}"] = [item for item, _ in top_items]
