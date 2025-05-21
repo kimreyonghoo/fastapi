@@ -136,7 +136,7 @@ async def recommend_supplements(userid: str):
     result = recommend_suppl(userid)
     return result
 
-class NutritionDeleteRequest(BaseModel):
+class userProfileData(BaseModel):
     gender:str
     age: str
     height: str
@@ -145,7 +145,9 @@ class NutritionDeleteRequest(BaseModel):
 
 
 @router.post("/database/user/profile")#수정/유저 등록 모두 사용
-async def save_user_profile(userid:str,user:dict):
+async def save_user_profile(userid:str,
+    user: userProfileData = Body(...)):
+
     #유저 프로필 수정정
     table = get_table('user',aws_access)
     # 저장
