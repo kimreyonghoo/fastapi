@@ -78,7 +78,6 @@ async def save_nutrient_data(
     tablename: str,
     data: NutritionSaveRequest = Body(...)
 ):
-    print(data)
     try:
         table = get_table(tablename, aws_access)
         if not table:

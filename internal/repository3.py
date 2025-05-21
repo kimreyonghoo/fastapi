@@ -77,7 +77,6 @@ def get_rdi(PK,SK):#프론트 구현 x
     )
     item = response.get('Item') 
     nutrition = [float(n) for n in item['nutrition']]
-    print(nutrition)
     return nutrition
 
 def convert_types(data):#프론트 구현 x
