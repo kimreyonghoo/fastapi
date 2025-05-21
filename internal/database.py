@@ -71,7 +71,7 @@ async def get_database_nutrients(tablename: str, name: str):
 class NutritionSaveRequest(BaseModel):
     user_id: str 
     date: str  # 예: "2025-05-01"
-    nutrients: list[float]
+    nutrition: list[float]
 
 @router.post("/database/{tablename}/save")
 async def save_nutrient_data(
@@ -84,7 +84,7 @@ async def save_nutrient_data(
             raise HTTPException(status_code=404, detail="테이블을 찾을 수 없습니다.")
 
         # float → Decimal로 변환
-        nutrition_decimal = [Decimal(str(v)) for v in data.nutrients]
+        nutrition_decimal = [Decimal(str(v)) for v in data.nutrition]
 
         item = {
             'PK': data.user_id,           # 예: "junho"
