@@ -84,7 +84,7 @@ async def save_nutrient_data(
             raise HTTPException(status_code=404, detail="테이블을 찾을 수 없습니다.")
 
         # float → Decimal로 변환
-        nutrition_decimal = [Decimal(str(v)) for v in data.nutrition]
+        nutrition_decimal = [Decimal(str(v)) for v in data.nutrients]
 
         item = {
             'PK': data.user_id,           # 예: "junho"
