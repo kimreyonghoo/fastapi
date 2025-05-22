@@ -211,14 +211,17 @@ meal_data = {
     start_date = today - timedelta(days=6)
 
     table=get_table("user",aws_access)
-    response = table.query(
-        KeyConditionExpression='PK = :pk AND SK BETWEEN :start AND :end',
-        ExpressionAttributeValues={
-            ':pk': f'{userid}',
-            ':start': f"meal#{start_date.isoformat()}",
-            ':end': f"meal#{today.isoformat()}"
-        }
-    )
+    try:
+        response = table.query(
+            KeyConditionExpression='PK = :pk AND SK BETWEEN :start AND :end',
+            ExpressionAttributeValues={
+                ':pk': f'{userid}',
+                ':start': f"meal#{start_date.isoformat()}",
+                ':end': f"meal#{today.isoformat()}"
+            }
+        )
+    except:
+        return None
     for item in response["Items"]:  
         if "nutrition" in item:
             item["nutrition"] = convert_decimals(item["nutrition"])
