@@ -70,27 +70,27 @@ async def get_database_nutrients(tablename: str, name: str):
 class NutritionSaveRequest(BaseModel):
     user_id: str 
     date: str  # 예: "2025-05-01"
-    nutrition: list[float]
+    nutrients: list[float]
     
 def nutrition_cal_sum(origindata: NutritionSaveRequest, savedata: NutritionSaveRequest) -> NutritionSaveRequest:
     # nutrients 요소별 덧셈
     summed_nutrition = [
-        a + b for a, b in zip(origindata.nutrition, savedata.nutrition)
+        a + b for a, b in zip(origindata.nutrients, savedata.nutrients)
     ]
     
     # savedata의 nutrients 갱신
-    savedata.nutrition = summed_nutrition
+    savedata.nutrients = summed_nutrition
     
     return savedata
 
 def nutrition_cal_sub(origindata: NutritionSaveRequest, savedata: NutritionSaveRequest) -> NutritionSaveRequest:
     # nutrients 요소별 덧셈
     summed_nutrition = [
-        a - b for a, b in zip(origindata.nutrition, savedata.nutrition)
+        a - b for a, b in zip(origindata.nutrients, savedata.nutrients)
     ]
     
     # savedata의 nutrients 갱신
-    savedata.nutrition = summed_nutrition
+    savedata.nutrients = summed_nutrition
     
     return savedata   
 
@@ -116,18 +116,18 @@ async def save_nutrient_data(
         origindata = NutritionSaveRequest(
             user_id=data.user_id,
             date=data.date,
-            nutrition=item.get('nutrition', [0.0] * len(data.nutrition))
+            nutrients=item.get('nutrients', [0.0] * len(data.nutrients))
         )
 
         updated_data = nutrition_cal_sum(origindata, data)
         # Decimal 변환
-        nutrition_decimal = [Decimal(str(v)) for v in updated_data.nutrition]
+        nutrition_decimal = [Decimal(str(v)) for v in updated_data.nutrients]
 
         # DynamoDB에 저장할 아이템 구성
         item_to_save = {
             'PK': updated_data.user_id,
             'SK': f'meal#{updated_data.date}',
-            'nutrition': nutrition_decimal
+            'nutrients': nutrition_decimal
         }
 
         table.put_item(Item=item_to_save)
@@ -143,10 +143,6 @@ class NutritionDeleteRequest(BaseModel):
     user_id: str
     date: str
     
-class NutritionSaveRequest(BaseModel):
-    user_id: str 
-    date: str  # 예: "2025-05-01"
-    nutrition: list[float]
 
 @router.post("/database/{tablename}/delete")
 async def delete_nutrient_data(
@@ -169,18 +165,18 @@ async def delete_nutrient_data(
         origindata = NutritionSaveRequest(
             user_id=data.user_id,
             date=data.date,
-            nutrition=item.get('nutrition', [0.0] * len(data.nutrition))
+            nutrients=item.get('nutrients', [0.0] * len(data.nutrients))
         )
 
         updated_data = nutrition_cal_sub(origindata, data)
         # Decimal 변환
-        nutrition_decimal = [Decimal(str(v)) for v in updated_data.nutrition]
+        nutrients_decimal = [Decimal(str(v)) for v in updated_data.nutrients]
 
         # DynamoDB에 저장할 아이템 구성
         item_to_save = {
             'PK': updated_data.user_id,
             'SK': f'meal#{updated_data.date}',
-            'nutrition': nutrition_decimal
+            'nutrients': nutrients_decimal
         }
 
         table.put_item(Item=item_to_save)
