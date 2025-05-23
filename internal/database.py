@@ -51,7 +51,7 @@ def get_name(tablename, name: str) -> dict:
         item = response.get('Item', {})
         print(repr(name))
         return {
-            'nutrition': item.get('nutrients', {}),
+            'nutrients': item.get('nutrients', {}),
             'qty': item.get('qty', 0)
         }
     
