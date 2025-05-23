@@ -51,7 +51,7 @@ def get_name(tablename, name: str) -> dict:
         item = response.get('Item', {})
         print(repr(name))
         return {
-            'nutrients': item.get('nutrients', {}),
+            'nutrition': item.get('nutrients', {}),
             'qty': item.get('qty', 0)
         }
     
@@ -116,7 +116,7 @@ async def save_nutrient_data(
         origindata = NutritionSaveRequest(
             user_id=data.user_id,
             date=data.date,
-            nutrition=item.get('nutrients', [0.0] * len(data.nutrition))
+            nutrition=item.get('nutrition', [0.0] * len(data.nutrition))
         )
 
         updated_data = nutrition_cal_sum(origindata, data)
@@ -127,7 +127,7 @@ async def save_nutrient_data(
         item_to_save = {
             'PK': updated_data.user_id,
             'SK': f'meal#{updated_data.date}',
-            'nutrients': nutrition_decimal
+            'nutrition': nutrition_decimal
         }
 
         table.put_item(Item=item_to_save)
