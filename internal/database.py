@@ -42,8 +42,6 @@ def get_table(table_name:str, access:dict):
         print(f'no {table_name} table')
         return None
 
-db=get_dynamodb(aws_access)
-
 def get_name(tablename, name: str) -> dict:
         response = get_table(tablename,aws_access).get_item(
             Key={
@@ -104,12 +102,16 @@ async def save_nutrient_data(
 class NutritionDeleteRequest(BaseModel):
     user_id: str
     date: str
-
+    
+class NutritionSaveRequest(BaseModel):
+    user_id: str 
+    date: str  # 예: "2025-05-01"
+    nutrients: list[float]
 
 @router.post("/database/{tablename}/delete")
 async def delete_nutrient_data(
     tablename: str,
-    data: NutritionDeleteRequest = Body(...)
+    data: NutritionSaveRequest = Body(...)
 ):
     try:
         table = get_table(tablename, aws_access)
