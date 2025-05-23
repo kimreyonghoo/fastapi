@@ -74,23 +74,23 @@ class NutritionSaveRequest(BaseModel):
     
 def nutrition_cal_sum(origindata: NutritionSaveRequest, savedata: NutritionSaveRequest) -> NutritionSaveRequest:
     # nutrients 요소별 덧셈
-    summed_nutrients = [
+    summed_nutrition = [
         a + b for a, b in zip(origindata.nutrition, savedata.nutrition)
     ]
     
     # savedata의 nutrients 갱신
-    savedata.nutrients = summed_nutrients
+    savedata.nutrition = summed_nutrition
     
     return savedata
 
 def nutrition_cal_sub(origindata: NutritionSaveRequest, savedata: NutritionSaveRequest) -> NutritionSaveRequest:
     # nutrients 요소별 덧셈
-    summed_nutrients = [
+    summed_nutrition = [
         a - b for a, b in zip(origindata.nutrition, savedata.nutrition)
     ]
     
     # savedata의 nutrients 갱신
-    savedata.nutrition = summed_nutrients
+    savedata.nutrition = summed_nutrition
     
     return savedata   
 
