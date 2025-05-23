@@ -117,7 +117,7 @@ def get_user_profile(userid):#유저 프로필 가져오기기
 
 def put_user_meal(user_id, date,user_meal_data:dict):#영양정보 넣기 @post, '2025-05-11'형식
     table = get_table('user',aws_access)
-    user_meal_data['nutrition']=convert_types(user_meal_data['nutrition'])
+    user_meal_data['nutrients']=convert_types(user_meal_data['nutrients'])
     # 저장
     response = table.put_item(
         Item={
@@ -220,13 +220,13 @@ meal_data = {
         }
     )
     for item in response["Items"]:  
-        if "nutrition" in item:
-            item["nutrition"] = convert_decimals(item["nutrition"])
-    if len(item["nutrition"])<40:
+        if "nutrients" in item:
+            item["nutrients"] = convert_decimals(item["nutrients"])
+    if len(item["nutrients"])<40:
         return None        
     for item in response['Items']:
-        if 'nutrition' in item:
-            nut = convert_decimals(item['nutrition'])
+        if 'nutrients' in item:
+            nut = convert_decimals(item['nutrients'])
             total_nutrition = [a + b for a, b in zip(total_nutrition, nut)]
             count += 1
     avg_nutrition = [x / count for x in total_nutrition] if count else [0.0] * len(nutr_db)
