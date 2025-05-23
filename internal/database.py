@@ -47,7 +47,7 @@ db=get_dynamodb(aws_access)
 def get_name(tablename, name: str) -> dict:
         response = get_table(tablename,aws_access).get_item(
             Key={
-                'PK': f'{unquote(name)}'
+                'PK': f'{name}'
             }
         )
         item = response.get('Item', {})
