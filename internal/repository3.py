@@ -184,6 +184,7 @@ meal_data = {
     height = float(user['height'])  # 키
     age = int(user['age'])                      # 나이
     act_level=float(user['act_level'])
+    
     if user['gender'] == 'male':
         bmr = 10 * weight + 6.25 * height - 5 * age + 5
     else:
@@ -222,7 +223,7 @@ meal_data = {
     for item in response["Items"]:  
         if "nutrients" in item:
             item["nutrients"] = convert_decimals(item["nutrients"])
-    if len(item["nutrients"])<40:
+    if item["nutrients"][0]<=0:
         return None        
     for item in response['Items']:
         if 'nutrients' in item:
