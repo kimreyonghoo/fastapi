@@ -219,12 +219,7 @@ meal_data = {
             ':start': f"meal#{start_date.isoformat()}",
             ':end': f"meal#{today.isoformat()}"
         }
-    )
-    for item in response["Items"]:  
-        if "nutrients" in item:
-            item["nutrients"] = convert_decimals(item["nutrients"])
-    if item["nutrients"][0]<=0:
-        return None        
+    )      
     for item in response['Items']:
         if 'nutrients' in item:
             nut = convert_decimals(item['nutrients'])
@@ -240,8 +235,10 @@ def recommend_suppl(userid):
     categories = ["vitamin", "iron", "magnesium", "calcium"]
     result = {}
 
-    # 사용자 부족량 벡터 계산
     deficiency_vector = cal_deficiency(userid)
+
+    if not deficiency_vector or all(x == 0 for x in deficiency_vector):
+        return {"message": "최근 식단 정보가 없어 추천할 수 없습니다."}
 
     for cat in categories:
         table = get_table(cat, aws_access)
