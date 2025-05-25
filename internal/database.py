@@ -178,7 +178,14 @@ async def delete_nutrient_data(
             'SK': f'meal#{updated_data.date}',
             'nutrients': nutrients_decimal
         }
-
+        if item_to_save['nutrients'][0]<=0:
+            response=table.delete_item(
+                Key={
+                    'PK': updated_data.user_id,
+                    'SK': f'meal#{updated_data.date}'
+                }
+            )
+            return None
         table.put_item(Item=item_to_save)
 
         return {"message": "✅ 삭제 성공", "item": item_to_save}
