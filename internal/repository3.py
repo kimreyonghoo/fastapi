@@ -239,7 +239,7 @@ def recommend_suppl(userid):
 
     deficiency_vector = cal_deficiency(userid)
 
-    if not deficiency_vector is None:
+    if deficiency_vector is None:
         return {"message": "최근 식단 정보가 없어 추천할 수 없습니다."}
 
     for cat in categories:
