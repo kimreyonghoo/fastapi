@@ -225,6 +225,8 @@ meal_data = {
             nut = convert_decimals(item['nutrients'])
             total_nutrition = [a + b for a, b in zip(total_nutrition, nut)]
             count += 1
+    if count == 0:
+        return None
     avg_nutrition = [x / count for x in total_nutrition] if count else [0.0] * len(nutr_db)
     
     #nutr_db의 순서와 동일,0번이 칼로리
