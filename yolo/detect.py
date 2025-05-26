@@ -41,7 +41,7 @@ LABELS_KOR = [
     "고추튀김", "새우튀김", "오징어튀김", "약과", "약식", "한과", "멍게", "산낙지", "물회", "육회"
 ]
 
-MODEL_PATH = "yolo/best.pt" # Path에 맞게 설정
+MODEL_PATH = "yolo/best.onnx" # Path에 맞게 설정
 model = YOLO(MODEL_PATH)  # Load Model
 
 def run_detection(img_path, save_path=None, json_save_path=None, conf_thres=0.5): # Save bounding boxed image

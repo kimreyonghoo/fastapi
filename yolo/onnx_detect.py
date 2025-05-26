@@ -4,6 +4,7 @@ import cv2
 import argparse
 import json
 import os
+from PIL import ImageFont, ImageDraw, Image
 
 # Label List (ENG)
 LABELS_ENG = [
@@ -48,7 +49,27 @@ MODEL_PATH = "yolo/best.onnx"
 session = ort.InferenceSession(MODEL_PATH, providers=["CPUExecutionProvider"])
 input_name = session.get_inputs()[0].name
 
+# 원본 비율 유지하며 640x640로 패딩
+def letterbox(img, new_shape=(640, 640), color=(114, 114, 114)):
+    shape = img.shape[:2]  # current shape [height, width]
+    r = min(new_shape[0] / shape[0], new_shape[1] / shape[1])  # resize ratio
+    new_unpad = (int(round(shape[1] * r)), int(round(shape[0] * r)))  # (w, h)
+
+    # resize
+    img_resized = cv2.resize(img, new_unpad, interpolation=cv2.INTER_LINEAR)
+
+    # compute padding
+    dw = new_shape[1] - new_unpad[0]
+    dh = new_shape[0] - new_unpad[1]
+    top, bottom = dh // 2, dh - dh // 2
+    left, right = dw // 2, dw - dw // 2
+
+    img_padded = cv2.copyMakeBorder(img_resized, top, bottom, left, right, cv2.BORDER_CONSTANT, value=color)
+
+    return img_padded, r, (dw / 2, dh / 2)
+
 # Preprocessing: Resize, normalize, and transpose image
+"""
 def preprocess(img_path):
     img = cv2.imread(img_path)
     img_resized = cv2.resize(img, (640, 640))
@@ -56,8 +77,21 @@ def preprocess(img_path):
     img_transposed = img_rgb.transpose(2, 0, 1) / 255.0
     input_tensor = img_transposed.astype(np.float32)
     return np.expand_dims(input_tensor, axis=0), img, img.shape[1], img.shape[0]
+"""
+def preprocess(img_path):
+    img = cv2.imread(img_path)
+    h0, w0 = img.shape[:2]
+
+    # Letterbox resize
+    img_lb, ratio, (dw, dh) = letterbox(img, new_shape=(640, 640)) # leterbox resize
+
+    img_rgb = cv2.cvtColor(img_lb, cv2.COLOR_BGR2RGB)
+    img_transposed = img_rgb.transpose(2, 0, 1) / 255.0
+    input_tensor = img_transposed.astype(np.float32)
+    return np.expand_dims(input_tensor, axis=0), img, ratio, dw, dh, w0, h0
 
 # Postprocessing: Convert raw output to label, confidence, bbox
+"""
 def postprocess(output, conf_thres, ori_w, ori_h):
     predictions = output[0][0]  # shape: (300, 6)
     results = []
@@ -87,6 +121,33 @@ def postprocess(output, conf_thres, ori_w, ori_h):
             })
 
     return results
+"""
+
+def postprocess(output, conf_thres, ratio, dw, dh, w0, h0):
+    predictions = output[0][0]
+    results = []
+
+    for det in predictions:
+        if len(det) < 6:
+            continue
+        x1, y1, x2, y2, conf, cls_id = det[:6]
+        if float(conf) < conf_thres:
+            continue
+
+        # 패딩 제거 후 원래 스케일로 변환
+        x1 = max(int((x1 - dw) / ratio), 0)
+        y1 = max(int((y1 - dh) / ratio), 0)
+        x2 = min(int((x2 - dw) / ratio), w0)
+        y2 = min(int((y2 - dh) / ratio), h0)
+
+        results.append({
+            "label_eng": LABELS_ENG[int(cls_id)],
+            "label_kor": LABELS_KOR[int(cls_id)],
+            "confidence": round(float(conf), 4),
+            "bbox": [x1, y1, x2, y2]
+        })
+
+    return results
 
 # Draw detection boxes (optional for visualization)
 def draw_boxes(img, results):
@@ -106,10 +167,14 @@ def run(img_path, save_path=None, conf_thres=0.5):
     save_path: 결과 이미지 저장 경로 (선택)
     conf_thres: confidence threshold"""
 
-    input_tensor, img, ori_w, ori_h = preprocess(img_path)
+    # input_tensor, img, ori_w, ori_h = preprocess(img_path)
+    # outputs = session.run(None, {input_name: input_tensor})
+    # results = postprocess(outputs, conf_thres, ori_w, ori_h)
+    input_tensor, img, ratio, dw, dh, w0, h0 = preprocess(img_path)
     outputs = session.run(None, {input_name: input_tensor})
-    results = postprocess(outputs, conf_thres, ori_w, ori_h)
-
+    results = postprocess(outputs, conf_thres, ratio, dw, dh, w0, h0)
+    
+    
     if save_path:
         img_out = draw_boxes(img, results)
         cv2.imwrite(save_path, img_out)
